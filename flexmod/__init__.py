@@ -7,6 +7,8 @@ import configparser
 from typing import Any, Callable, List
 from collections import defaultdict
 
+DUMMY_PREPROCESSOR = lambda x: x
+DUMMY_VALIDATION = lambda x: True
 
 def auto_interpret(text):
     """
@@ -33,9 +35,9 @@ class ConfigValue:
         self,
         name: str,
         hint: str,
-        preprocessor: Callable,
-        validation: Callable,
         default: Any,
+        preprocessor: Callable = DUMMY_PREPROCESSOR,
+        validation: Callable = DUMMY_VALIDATION,
     ):
         self.name = name
         self.hint = hint
@@ -43,7 +45,6 @@ class ConfigValue:
         self._validation = validation
         self._example = default
         self._value = self.parse(default)
-        self._value_lock = False
 
     def parse(self, value):
         value = self._preprocessor(value)
@@ -68,18 +69,17 @@ class ConfigValue:
 
     @value.setter
     def value(self, value):
-        assert not self.locked, f"{self.name} is locked from updates."
         self._value = self.parse(value)
-
-    @property
-    def locked(self):
-        return self._value_lock
 
     
 class AutolockedConfigValue(ConfigValue):
     """
     Config that locks it self upon a value read operation.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._value_lock = False
+
     @property
     def value(self):
         """
@@ -93,8 +93,12 @@ class AutolockedConfigValue(ConfigValue):
         assert not self.locked, f"{self.name} is locked from updates."
         self._value = self.parse(value)
 
+    @property
+    def locked(self):
+        return self._value_lock
 
-class AutolockedConfig:
+
+class Config:
     """
     Dict-like object where key reads locks the value from updates.
     """
@@ -102,12 +106,12 @@ class AutolockedConfig:
     def __init__(
         self,
         name: str,
-        values: List[AutolockedConfigValue],
+        values: List[ConfigValue],
     ):
         self.name = name
         self._data = dict()
         for _value in values:
-            assert isinstance(_value, AutolockedConfigValue)
+            assert isinstance(_value, ConfigValue)
             self._data[_value.name] = _value
 
     def __getitem__(self, key):
@@ -134,20 +138,20 @@ class AutolockedConfig:
         return {_k: _v.value for _k, _v in self._data.items()}
 
 
-class AutolockedConfigIndex:
+class ConfigIndex:
     """
-    ConfigParser-like object where sub-dictionaries are AutolockedConfig's.
+    ConfigParser-like object where sub-dictionaries are Config's.
     """
 
     def __init__(
         self,
-        configs: List[AutolockedConfig],
+        configs: List[Config],
     ):
         self._configs = dict()
         self._value_name_to_config_names = defaultdict(list)
         for _config in configs:
             # assign configs
-            assert isinstance(_config, AutolockedConfig)
+            assert isinstance(_config, Config)
             self._configs[_config.name] = _config
 
     def __getitem__(self, key):

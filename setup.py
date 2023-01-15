@@ -13,7 +13,7 @@ def get_description():
 
 setuptools.setup(
     name="flexmod",
-    version="0.0.1",
+    version="0.1.0",
     description="A module for other modules to allow flexible (yet not error-prone) configuration.",
     long_description=get_description(),
     long_description_content_type="text/markdown",

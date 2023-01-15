@@ -1,19 +1,51 @@
 # flexmod
 A python module for other modules to allow flexible (yet not error-prone) configuration.
 
+## Example
+
+Suppose you wrote a package and you want to allow users to set package-level configs.
+
+Something like this:
+
+```python
+import awesomepackage
+from awesomepackage.foo import bar
+
+# user can change module param on the fly
+awesomepackage.config["logging"]["verbose"] = True
+
+# package behavior is now different from default
+bar()
+```
+
+This is simple, but maybe not any parameter can be changed at any time. For example:
+
+```python
+awesomepackage.config["metric"]["length"] = "foot"
+```
+
+Having flexible units may be helpful for different locales, but Changing metric units in the middle of a program can lead to consistency issues.
+
+`flexmod` lets you:
+-   specify configs that are auto-locked (i.e. no further changes) when used
+-   add custom preprocessing functions to entered config values
+    -   this is useful when reading config from a text file
+-   add validation functions to check user-supplied config values
+
 ## Usage
 
 ### Define configurations in your module using `flexmod` classes
 
 ```python
 # mypackage/__init__.py
-from flexmod import AutolockedConfigValue, AutolockedConfig, AutolockedConfigIndex
+from flexmod import ConfigValue, AutolockedConfigValue, Config, ConfigIndex
 
-config = AutolockedConfigIndex(
+config = ConfigIndex(
     [
-        AutolockedConfig(
+        Config(
 	    "interface",
 	    [
+	        # example of a config that stays the same throughout a program
 	    	AutolockedConfigValue(
 		    # name of the config paramater
 		    "language",
@@ -21,19 +53,20 @@ config = AutolockedConfigIndex(
 		    "The language of module interface (logs, warnings, etc.)",
 		    # default value
 		    "en-us",
+		    # validate the config value
+		    validation=lambda x: x in ["en-us", "fr-fr"],
 		),
-	    	AutolockedConfigValue(
+	        # example of a config that can change dynamically
+	    	ConfigValue(
 		    "verbosity",
 		    "The granularity to which the module reports / complains",
 		    1,
 		    # specify a preprocessing function if needed
 		    preprocessing=int,
-		    # validate the config value
-		    validation=lambda x: (isinstance(x, int) and x >= 0),
 		),
 	    ],
 	),
-        AutolockedConfig(
+        Config(
 	    "foo",
 	    [
 	    	AutolockedConfigValue(
