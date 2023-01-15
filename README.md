@@ -3,7 +3,7 @@ A python module for other modules to allow flexible (yet not error-prone) config
 
 ## Usage
 
-Define configurations in your module using flexmod classes:
+### Define configurations in your module using `flexmod` classes
 
 ```python
 # mypackage/__init__.py
@@ -64,8 +64,11 @@ def hello_world():
         pass
 ```
 
-Your user can use `load_override` to customize your module:
-```
+### Package user: customize your module on the fly
+
+Your user will not need to be aware of `flexmod`.
+
+```python
 import mypackage
 from mypackage.message import hello_world
 
@@ -78,7 +81,30 @@ hello_world()
 # after an autolocked config is read, it cannot be changed
 mypackage.config["interface"]["language"] = "en-us"
 # AssertionError: language is locked from updates.
-
 ```
 
+Users can also supply an [configparser](https://docs.python.org/3/library/configparser.html)-style ini file.
+
+-   Unlike in default configparser, booleans, integers and floats will be autodetected and converted.
+
+```ini
+# in custom.ini
+[interface]
+language = fr-fr
+verbosity = 2
+
+[foo]
+bar = anything
+```
+
+```python
+import mypackage
+from mypackage.message import hello_world
+
+# change module param on the fly
+mypackage.config.load_override("custom.ini")
+
+# this gets "Bonjour, tout le monde!"
+hello_world()
+```
 
