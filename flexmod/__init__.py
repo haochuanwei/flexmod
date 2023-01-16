@@ -131,7 +131,7 @@ class Config:
 
     def hint(self):
         return {
-            _k: f"{_v.hint}. Example: {_v.example}" for _k, _v in self._data.items()
+            _k: {"hint": _v.hint, "example": _v.example} for _k, _v in self._data.items()
         }
 
     def items(self):
