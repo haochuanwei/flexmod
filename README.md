@@ -1,11 +1,9 @@
 # flexmod
 A python module for other modules to allow flexible (yet not error-prone) configuration.
 
-## Example
+## Story
 
-Suppose you wrote a package and you want to allow users to set package-level configs.
-
-Something like this:
+Suppose you wrote a package and you want to allow users to set package-level configs:
 
 ```python
 import awesomepackage
@@ -24,11 +22,11 @@ This is simple, but maybe not any parameter can be changed at any time. For exam
 awesomepackage.config["metric"]["length"] = "foot"
 ```
 
-Having flexible units may be helpful for different locales, but Changing metric units in the middle of a program can lead to consistency issues.
+Having flexible units may be helpful for different locales, but changing metric units in the middle of a program can lead to consistency issues.
 
 `flexmod` lets you:
 -   specify configs that are auto-locked (i.e. no further changes) when used
--   add custom preprocessing functions to entered config values
+-   add custom preprocessor functions to entered config values
     -   this is useful when reading config from a text file
 -   add validation functions to check user-supplied config values
 
@@ -61,8 +59,8 @@ config = ConfigIndex(
 		    "verbosity",
 		    "The granularity to which the module reports / complains",
 		    1,
-		    # specify a preprocessing function if needed
-		    preprocessing=int,
+		    # specify a preprocessor function if needed
+		    preprocessor=int,
 		),
 	    ],
 	),
