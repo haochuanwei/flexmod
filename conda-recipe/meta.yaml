@@ -1,0 +1,43 @@
+{% set name = "flexmod" %}
+{% set version = "0.1.1" %}
+
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/haochuanwei/flexmod.git
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.7
+    - pip
+  run:
+    - python >=3.7
+
+test:
+  imports:
+    - flexmod
+  commands:
+    - pytest
+  requires:
+    - pip
+    - pytest
+  source_files:
+    - tests
+
+about:
+  license: MIT
+  license_file: LICENSE
+  summary: A python module for other modules to allow flexible (yet not error-prone) configuration.
+  dev_url: https://github.com/phurwicz/hover
+
+extra:
+  recipe-maintainers:
+    - haochuanwei
