@@ -17,6 +17,14 @@ def auto_interpret(text):
     if not isinstance(text, str):
         return text
 
+    # detect JSON body
+    try:
+        data = json.loads(text)
+        return data
+    except ValueError:
+        pass
+
+    # detect numbers and booleans
     if re.search(r"^\-?\d+$", text):
         return int(text)
     if re.search(r"^\-?\d+\.\d+$", text):
