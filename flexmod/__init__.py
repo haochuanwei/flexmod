@@ -3,6 +3,7 @@ Toolbox for your library to be dynamically configured by the user.
 Add defaults, hints, locks, preprocessors and validations for robustness.
 """
 import re
+import json
 import configparser
 from typing import Any, Callable, List
 from collections import defaultdict
@@ -119,7 +120,8 @@ class Config:
         self.name = name
         self._data = dict()
         for _value in values:
-            assert isinstance(_value, ConfigValue)
+            assert isinstance(_value, ConfigValue), f"Expected ConfigValue, got {type(_value)}"
+            assert _value.name not in self._data, f"Duplicate key {_value.name}"
             self._data[_value.name] = _value
 
     def __getitem__(self, key):
@@ -159,7 +161,8 @@ class ConfigIndex:
         self._value_name_to_config_names = defaultdict(list)
         for _config in configs:
             # assign configs
-            assert isinstance(_config, Config)
+            assert isinstance(_config, Config), f"Expected Config, got {type(_config)}"
+            assert _config.name not in self._configs, f"Duplicate key {_config.name}"
             self._configs[_config.name] = _config
 
     def __getitem__(self, key):
